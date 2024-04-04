@@ -8,12 +8,30 @@ const Tester = ({ text = "" }) => {
   const [accuracy, setAccuracy] = useState(0);
   // const [wpm, setWpm] = useState(0);
   const correctText = "its john cena";
+  const correctWordsCount = correctText.trim().split(/\s+/).length;
 
   const handleInputChange = (event) => {
+    const newText = event.target.value;
+    setInputText(newText);
     if (!startTime) {
       setStartTime(Date.now());
     }
-    setInputText(event.target.value);
+
+    const inputWords = newText.trim().split(/\s+/);
+
+    let correctWordsTyped = 0;
+    for (let i = 0; i < correctWordsCount; i++) {
+      if (inputWords[i] === correctText.split(/\s+/)[i]) {
+        correctWordsTyped++;
+      }
+    }
+    if (
+      correctWordsTyped === correctWordsCount ||
+      (inputText.split(/\s+/).length - 1 === correctWordsCount && !endTime)
+    ) {
+      setEndTime(Date.now());
+      alert("its ova baby");
+    }
   };
 
   // accuracy
@@ -102,12 +120,7 @@ const Tester = ({ text = "" }) => {
         {/* <div>Accuracy: {accuracy}%</div> */}
         {/* <div>Words per minute: {wpm}</div> */}
         <br />
-        <input
-          id="userInput"
-          type="text"
-          value={inputText}
-          onChange={handleInputChange}
-        />
+        <input type="text" value={inputText} onChange={handleInputChange} />
       </div>
       <div>
         <button className="startButton" onClick={startTest} />
