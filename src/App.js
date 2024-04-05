@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Tester from "./Tester";
 import "./App.css";
 
@@ -25,6 +25,8 @@ const Epub = () => {
   const [testStarted, setTestStarted] = useState(false);
   const [currentWordHighlight, setCurrentWordHighlight] = useState(0);
   const [wordsMaster, setWordsMaster] = useState("");
+  const [endTime, setEndTime] = useState(null);
+  const [accuracy, setAccuracy] = useState(0);
 
   // const reset = () => {
   //   setParagraphIdx(0);
@@ -130,12 +132,13 @@ const Epub = () => {
   //     .replace("—", "-")
   //     .split(/[\n\s]+/)
   // );
-  const words = ["Bit", "stuff", "here"];
   // useEffect(() => {
   //   inputRef.current.focus();
   // }, []);
 
   // Test the letters for each word
+  const words = related[random].extract.split(" ");
+
   const handleInputChange = (e) => {
     const value = e.target.value;
     setWordsMaster(value);
@@ -148,35 +151,37 @@ const Epub = () => {
       } else {
       }
     }
-
-    // Test the word after each character
-
-    if (value.endsWith(" ")) {
-      let lastSubstring = value.trim();
-      if (lastSubstring.includes(" ")) {
-        lastSubstring = value.trim().split(" ").pop();
-      }
-      console.log(lastSubstring);
-      if (lastSubstring.trim() === currentWord) {
-        console.log("correct word");
-        if (paraInputValue.length + 1 === words.length) {
-          setParagraphIdx(paragraphIdx + 1);
-          alert("next line");
-          setParaInputValue([]);
-          setCurrentWordIndex(0);
-        } else {
-          console.log("YUP");
-          setParaInputValue([...paraInputValue, value.trim()]);
-        }
-      } else {
-        console.log("NOPE");
-        // Handle incorrect word here
-      }
-      if (currentWordIndex < words.length - 1)
-        setCurrentWordIndex(currentWordIndex + 1);
-      setHighlightedCharacters("");
-    }
   };
+
+  // accuracy
+  useEffect(() => {
+    const calculateAccuracy = () => {
+      let correctCount = 0;
+      for (let i = 0; i < related[random].extract.length; i++) {
+        if (wordsMaster[i] === related[random].extract[i]) {
+          correctCount++;
+        }
+      }
+      const accuracyPercentage =
+        (correctCount / related[random].extract.length) * 100;
+      setAccuracy(accuracyPercentage.toFixed(2));
+    };
+    if (wordsMaster.length === related[random].extract.length && !endTime) {
+      setEndTime(Date.now());
+    }
+    calculateAccuracy();
+  }, [endTime, random, related, wordsMaster]);
+
+  // cursor
+  useEffect(() => {
+    const firstSpan = document.getElementsByClassName("notTyped");
+    if (firstSpan.length > 0) {
+      Array.from(firstSpan).forEach((element) =>
+        element.classList.remove("pulsating-cursor")
+      );
+      firstSpan[0].classList.add("pulsating-cursor");
+    }
+  });
 
   // regarding the shuffle before the highlighting
   // currently setting random zero and never changing it.  In the
@@ -192,8 +197,8 @@ const Epub = () => {
     return array;
   };
 
-  const highlightText = (idx = random) => {
-    const correctText = related[idx].extract;
+  const highlightText = () => {
+    const correctText = related[random].extract;
     const inputText = wordsMaster;
     const highlightedChars = [];
     for (let i = 0; i < correctText.length; i++) {
@@ -207,7 +212,7 @@ const Epub = () => {
           );
         } else {
           highlightedChars.push(
-            <span key={i} className="wrong">
+            <span key={i} className="typed wrong">
               {inputText[i]}
             </span>
           );
@@ -220,16 +225,17 @@ const Epub = () => {
         );
       }
     }
-    if (inputText.length > correctText.length) {
-      const extraChars = inputText.slice(correctText.length);
-      for (let i = 0; i < extraChars.length; i++) {
-        highlightedChars.push(
-          <span key={correctText.length + i} style={{ color: "red" }}>
-            {extraChars[i]}
-          </span>
-        );
-      }
-    }
+    // if (inputText.length > correctText.length) {
+    //   console.log("woah");
+    //   const extraChars = inputText.slice(correctText.length);
+    //   for (let i = 0; i < extraChars.length; i++) {
+    //     highlightedChars.push(
+    //       <span key={correctText.length + i} style={{ color: "red" }}>
+    //         {extraChars[i]}
+    //       </span>
+    //     );
+    //   }
+    // }
     return highlightedChars;
   };
   const handleSearchChange = (event) => {
@@ -251,7 +257,7 @@ const Epub = () => {
       if (!response.ok) {
         throw new Error("Error: Unable to fetch data");
       }
-
+      setSearchQuery("");
       const data = await response.json();
       setRelated(shuffleArray(data.pages));
     } catch (error) {
@@ -277,25 +283,43 @@ const Epub = () => {
           onChange={handleSearchChange}
         />
         <div className="buttonGroup">
-          <button className="search" onClick={handleRelatedSearch}>
-            GO
-          </button>
-          <button
-            className="search"
-            onClick={() => {
-              fetchWikipediaSummary(searchQuery);
-            }}
-          >
-            NEW
-          </button>
+          {related[0].extract === "" ||
+          related[0].extract === "Nothing found try again..." ? (
+            <button
+              className="search"
+              onClick={() => {
+                fetchWikipediaSummary(searchQuery);
+              }}
+            >
+              SEARCH
+            </button>
+          ) : (
+            <>
+              <button className="search related" onClick={handleRelatedSearch}>
+                RELATED
+              </button>
+              <button
+                className="search new"
+                onClick={() => {
+                  fetchWikipediaSummary(searchQuery);
+                }}
+              >
+                NEW
+              </button>
+            </>
+          )}
         </div>
       </div>
-      {error && <p>{error}</p>}
+      <div>Accuracy: {accuracy}%</div>
       <div className="writer">
-        <div className="area">{highlightText()}</div>
-        <button className="startButton" onClick={startTest}></button>
+        <div id="letter-container" className="area">
+          {highlightText()}
+        </div>
+        <button className="startButton" onClick={startTest}>
+          START
+        </button>
         <textarea
-          id="userInputs"
+          id="userInput"
           ref={inputRef}
           type="text"
           value={inputValue}

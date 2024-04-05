@@ -24,6 +24,54 @@ h1{
   flex-direction: row;
 }
 
+button {
+	border: none;
+	position: relative;
+	-webkit-transition: all 0.6s;
+	-moz-transition: all 0.6s;
+	transition: all 0.6s;
+}
+
+button:after {
+	content: '';
+	position: absolute;
+	z-index: -1;
+	-webkit-transition: all 0.6s;
+	-moz-transition: all 0.6s;
+	transition: all 0.6s;
+}
+
+
+.related {
+  background: #3498db;;
+  color: #fff;
+}
+
+.related:hover {
+  background: #2980b9;
+}
+
+.related:active {
+  background: #2980b9;
+  top: 2px;
+}
+
+
+.new {
+  background: #2ecc71;
+  color: #fff;
+}
+
+.new:hover {
+  background: #27ae60;
+}
+
+.new:active {
+  background: #27ae60;
+  top: 2px;
+}
+
+
 
 .search{
   border: none;
@@ -73,16 +121,38 @@ width: 800px;
 
 /* start button */
 .startButton{
+  font-size: medium;
   font-family: 'Courier New', Courier, monospace;
   margin-top: 20px;
-  border: none;
-  border-radius: 50px;
-  background-color:rgb(100, 243, 195);
-  height: 30px;
-  width: 30px;
+  height: 22px;
+  width: 70px;
+  font-weight:bold;
+  background-color: transparent; 
+}
+.startButton:active {
+  top: 2px;
 }
 
 /* Visuals for the users input */
 #userInput{
   opacity: 0;
+}
+
+@keyframes pulse {
+  0% {
+    text-decoration: underline;
+  }
+  50% {
+    text-decoration: none;
+  }
+  100% {
+    text-decoration: underline;
+  }
+}
+
+.pulsating-cursor {
+  cursor: pointer;
+  animation: pulse 1.5s ease-in-out infinite;
+  color:rgb(0, 0, 0);
+  
 }
