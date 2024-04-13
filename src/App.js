@@ -1,176 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
-import Tester from "./Tester";
 import "./App.css";
 
-const Epub = () => {
-  const [chapters, setChapters] = useState([]);
-  const [currentChapter, setCurrentChapter] = useState(0);
-  const [chatperSelected, setChatperSelected] = useState(false);
-  const [chapterDetail, setChapterDetail] = useState([""]);
-  const [book, setBook] = useState(null);
-  const [cover, setCover] = useState(null);
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [paragraphIdx, setParagraphIdx] = useState(0);
+const TypingTest = () => {
   const [inputValue, setInputValue] = useState("");
-  const [paraInputValue, setParaInputValue] = useState([]);
-  const [highlightedCharacters, setHighlightedCharacters] = useState("");
-  const [wrongCharacters, setWrongCharacters] = useState("");
-  const [isTestComplete, setIsTestComplete] = useState(false);
-  const [startTime, setStartTime] = useState(null);
   const inputRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [related, setRelated] = useState([{ extract: "" }]);
-  const [error, setError] = useState("");
-  const [random, setRandom] = useState(0);
   const [testStarted, setTestStarted] = useState(false);
-  const [currentWordHighlight, setCurrentWordHighlight] = useState(0);
   const [wordsMaster, setWordsMaster] = useState("");
   const [endTime, setEndTime] = useState(null);
   const [accuracy, setAccuracy] = useState(0);
-
-  // const reset = () => {
-  //   setParagraphIdx(0);
-  //   setCurrentWordIndex(0);
-  //   setInputValue("");
-  //   setParaInputValue([]);
-  //   setHighlightedCharacters("");
-  // };
-
-  // const getSubitems = (a, res = []) => {
-  //   const result = [];
-  //   console.log("this is a ", a);
-  //   function processSubitems(obj) {
-  //     if (Array.isArray(obj)) {
-  //       obj.forEach((item) => {
-  //         processSubitems(item);
-  //       });
-  //     } else if (typeof obj === "object" && obj !== null) {
-  //       if (obj.hasOwnProperty("subitems")) {
-  //         if (obj.subitems.length === 0) {
-  //           result.push(obj);
-  //         } else {
-  //           processSubitems(obj.subitems);
-  //         }
-  //       }
-  //     }
-  //   }
-
-  //   processSubitems(a);
-
-  //   return result;
-  // };
-
-  // const uploadEPUB = (event) => {
-  //   const file = event.target.files[0];
-
-  //   if (file) {
-  //     const reader = new FileReader();
-
-  //     reader.onload = async (event) => {
-  //       const fileData = event.target.result;
-  //       const book = ePub(fileData);
-
-  //       book.ready.then(async () => {
-  //         console.log("book here ", book);
-  //         // const rendition = book.renderTo("viewer", {
-  //         //   width: "100%",
-  //         //   height: "600px",
-  //         // });
-  //         // await rendition.display();
-  //         const chaps = getSubitems(book.navigation.toc);
-  //         setChapters(chaps);
-  //         setBook(book);
-  //         setCover(await book.coverUrl());
-  //       });
-  //     };
-
-  //     reader.onerror = (event) => {
-  //       console.error("Error reading file:", event.target.error);
-  //     };
-
-  //     reader.readAsArrayBuffer(file);
-  //   } else {
-  //     alert("Please select an EPUB file.");
-  //   }
-  // };
-
-  // const getChapter = async (idx) => {
-  //   reset();
-  //   let href = chapters[idx].href.replace(/#.*/, "");
-  //   book.load(href).then(function (content) {
-  //     let temp = [];
-  //     const paragraphs = content.body.querySelectorAll("p");
-  //     if (paragraphs.length > 0) {
-  //       for (let p of paragraphs) {
-  //         temp.push(p.innerHTML);
-  //       }
-  //     } else {
-  //       temp = [" "];
-  //     }
-
-  //     setChapterDetail(temp);
-  //     setCurrentChapter(idx);
-  //     setChatperSelected(true);
-  //   });
-  // };
-
-  // const words = chapterDetail[paragraphIdx]
-  //   .replace(/<span[^>]*>(.*?)<\/span>/g, "$1")
-  //   .replace(/<em[^>]*>(.*?)<\/em>/g, "$1")
-  //   .replace("–", "-")
-  //   .replace("–", "-")
-  //   .replace("—", "-")
-  //   .split(/[\n\s]+/);
-
-  // console.log(
-  //   "ssssss ",
-  //   chapterDetail[paragraphIdx]
-  //     .replace(/<span[^>]*>(.*?)<\/span>/g, "$1")
-  //     .replace(/<em[^>]*>(.*?)<\/em>/g, "$1")
-  //     .replace("–", "-")
-  //     .replace("–", "-")
-  //     .replace("—", "-")
-  //     .split(/[\n\s]+/)
-  // );
-  // useEffect(() => {
-  //   inputRef.current.focus();
-  // }, []);
-
-  // Test the letters for each word
-  const words = related[random].extract.split(" ");
 
   const handleInputChange = (e) => {
     const value = e.target.value;
     setWordsMaster(value);
     setInputValue(value);
-    const currentWord = words[currentWordIndex];
-    const typedWord = value.trim();
-    for (let i = 0; i < typedWord.length; i++) {
-      if (currentWord[i] === typedWord[i]) {
-        setHighlightedCharacters(typedWord[i]);
-      } else {
-      }
-    }
   };
-
-  // accuracy
-  useEffect(() => {
-    const calculateAccuracy = () => {
-      let correctCount = 0;
-      for (let i = 0; i < related[random].extract.length; i++) {
-        if (wordsMaster[i] === related[random].extract[i]) {
-          correctCount++;
-        }
-      }
-      const accuracyPercentage =
-        (correctCount / related[random].extract.length) * 100;
-      setAccuracy(accuracyPercentage.toFixed(2));
-    };
-    if (wordsMaster.length === related[random].extract.length && !endTime) {
-      setEndTime(Date.now());
-    }
-    calculateAccuracy();
-  }, [endTime, random, related, wordsMaster]);
 
   // cursor
   useEffect(() => {
@@ -198,7 +43,7 @@ const Epub = () => {
   };
 
   const highlightText = () => {
-    const correctText = related[random].extract;
+    const correctText = related[0].extract;
     const inputText = wordsMaster;
     const highlightedChars = [];
     for (let i = 0; i < correctText.length; i++) {
@@ -225,17 +70,6 @@ const Epub = () => {
         );
       }
     }
-    // if (inputText.length > correctText.length) {
-    //   console.log("woah");
-    //   const extraChars = inputText.slice(correctText.length);
-    //   for (let i = 0; i < extraChars.length; i++) {
-    //     highlightedChars.push(
-    //       <span key={correctText.length + i} style={{ color: "red" }}>
-    //         {extraChars[i]}
-    //       </span>
-    //     );
-    //   }
-    // }
     return highlightedChars;
   };
   const handleSearchChange = (event) => {
@@ -310,7 +144,6 @@ const Epub = () => {
           )}
         </div>
       </div>
-      <div>Accuracy: {accuracy}%</div>
       <div className="writer">
         <div id="letter-container" className="area">
           {highlightText()}
@@ -324,14 +157,12 @@ const Epub = () => {
           type="text"
           value={inputValue}
           onChange={handleInputChange}
-          disabled={isTestComplete}
           autoFocus
           style={{ width: "25%", height: "25px", marginTop: "15px" }}
         />
       </div>
-      {/* <Tester text={related && related[random].extract} /> */}
     </>
   );
 };
 
-export default Epub;
+export default TypingTest;
